@@ -5,3 +5,6 @@
 nextjs-portal {
     display: none;
   }
+  body{
+    background: linear-gradient(to right, #251a40, #471B70, #451C6C);
+}
