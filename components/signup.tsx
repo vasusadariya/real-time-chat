@@ -27,7 +27,7 @@ export function SignUp() {
                             }} label="Password" type={"password"} placeholder="********" />
                             <button onClick={async () => {
                                 try {
-                                    const response = await axios.post("http://localhost:3000/api/Signup", {
+                                    const get = await axios.post("http://localhost:3000/api/Signup", {
                                         email,
                                         password,
                                     });

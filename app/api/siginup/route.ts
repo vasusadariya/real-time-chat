@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
             }
         });
     } catch (e) {
+        console.log(e);
         return NextResponse.json({
             msg: "Error while signing up",
         }, {

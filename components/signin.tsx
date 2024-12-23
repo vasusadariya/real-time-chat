@@ -26,12 +26,12 @@ export function SignIn1() {
                         }} label="Password" type={"password"} placeholder="********" />
                         <button onClick={async () => {
                             try {
-                                const response = await axios.post("http://localhost:3000/api/Signin", {
+                                const get = await axios.post("http://localhost:3000/api/Signin", {
                                     email,
                                     password,
                                 });
                                 router.push("/dashboard");
-                            } catch (error) {
+                            }catch (error) {
                                 if (error.response?.status === 401) {
                                     alert("Invalid email or password");
                                 } else {

@@ -20,7 +20,8 @@ export async function POST(req: NextRequest) {
                 status: 401,
             });
         }
-    } catch (e) {
+    } catch (e)
+     {  console.log(e);
         return NextResponse.json({
             msg: "Error while signing in",
         }, {
