@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
         if (!body.email || !body.password || !body.name) {
             return NextResponse.json(
                 { error: "All fields are required" },
-                { status: 400 } // Bad Request
+                { status: 404 }
             );
         }
 
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
         if (existingUser) {
             return NextResponse.json(
                 { error: "User already exists" },
-                { status: 409 } // Conflict
+                { status: 401 } 
             );
         }
 
@@ -31,14 +31,14 @@ export async function POST(req: NextRequest) {
         });
 
         return NextResponse.json(
-            { email: newUser.email, name: newUser.name },
-            { status: 201 } // Created
+            { msg:"Succesfully created user",email: newUser.email, name: newUser.name },
+            { status: 201 } 
         );
     } catch (error) {
         console.error("Error in signup API:", error);
         return NextResponse.json(
             { error: "Internal server error" },
-            { status: 500 } // Internal Server Error
+            { status: 500 }     
         );
     }
 }
