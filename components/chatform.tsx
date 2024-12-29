@@ -17,7 +17,7 @@ export default function ChatForm({
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center justify-center min-h-[100px]">
             <form onSubmit={handleSubmit} className="flex gap-2 mt-4">
                 <input
                     className="flex-1 px-9 border-2 py-2 rounded-lg focus:outline-none text-black items-center"
