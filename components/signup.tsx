@@ -78,12 +78,6 @@ export default function SignUP() {
                             Sign Up
                         </button>
                     </div>
-                    <p className="text-sm text-gray-600 mt-4 text-center">
-                        Don't have an account?{' '}
-                        <a className="underline text-gray-800" href="/auth/signup">
-                            Sign up
-                        </a>
-                    </p>
                 </div>
             </div>
         </div>

@@ -6,7 +6,7 @@ export default function Appbar() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   useEffect(() => {
-    const token = localStorage.getItem("Token"); 
+    const token = localStorage.getItem("Token");
     if (token) {
       setIsLoggedIn(true);
     }
@@ -14,7 +14,7 @@ export default function Appbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("Token");
-    setIsLoggedIn(false);
+    setIsLoggedIn(false); 
     router.push("/");
   };
 
