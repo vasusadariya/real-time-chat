@@ -1,10 +1,12 @@
-"use client"
+"use client";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 export default function Appbar() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   useEffect(() => {
     const token = localStorage.getItem("Token");
     if (token) {
@@ -14,40 +16,99 @@ export default function Appbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("Token");
-    setIsLoggedIn(false); 
+    setIsLoggedIn(false);
     router.push("/");
   };
 
   return (
-    <div className="flex justify-between mt-4 m-4 pl-4 pt-2">
-      <div className="text-4xl font-extrabold text-white">
-        <a href="#">Timepass</a>
-      </div>
-      <div className="space-x-4">
-        {!isLoggedIn ? (
-          <div>
-            <button
-              className="text-3xl px-2 py-1 pb-2 text-white focus:ring-2 focus:ring-black font-medium rounded-lg hover:bg-gray-200 hover:text-black"
-              onClick={() => router.push("/auth/login")}
-            >
-              Log in
-            </button>
-            <button
-              className="text-3xl text-white px-2 py-1 pb-2 focus:ring-2 focus:ring-black font-medium rounded-lg hover:bg-gray-200 hover:text-black"
-              onClick={() => router.push("/auth/signup")}
-            >
-              Sign up
-            </button>
-          </div>
-        ) : (
+    <div className="text-white">
+      <div className="flex justify-between items-center p-4 lg:px-8">
+        <div className="text-2xl sm:text-3xl font-extrabold">
+          <a href="#">Timepass</a>
+        </div>
+        <div className="lg:hidden">
           <button
-            className="text-3xl text-white px-2 py-1 pb-2 focus:ring-2 focus:ring-black font-medium rounded-lg hover:bg-gray-200 hover:text-black"
-            onClick={handleLogout}
+            className="focus:outline-none text-white"
+            onClick={() => setMenuOpen(!menuOpen)}
           >
-            Log out
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h16m-7 6h7"
+              ></path>
+            </svg>
           </button>
-        )}
+        </div>
+        <div className="hidden lg:flex space-x-4">
+          {!isLoggedIn ? (
+            <>
+              <button
+                className="text-sm lg:text-lg px-3 py-2 focus:ring-2 focus:ring-black font-medium rounded-lg bg-gray-700 hover:bg-gray-600"
+                onClick={() => router.push("/auth/login")}
+              >
+                Log in
+              </button>
+              <button
+                className="text-sm lg:text-lg px-3 py-2 focus:ring-2 focus:ring-black font-medium rounded-lg bg-gray-700 hover:bg-gray-600"
+                onClick={() => router.push("/auth/signup")}
+              >
+                Sign up
+              </button>
+            </>
+          ) : (
+            <button
+              className="text-sm lg:text-lg px-3 py-2 focus:ring-2 focus:ring-black font-medium rounded-lg bg-gray-700 hover:bg-gray-600"
+              onClick={handleLogout}
+            >
+              Log out
+            </button>
+          )}
+        </div>
       </div>
+      {menuOpen && (
+        <div className="lg:hidden flex flex-col items-start space-y-2 p-4 bg-gray-700">
+          {!isLoggedIn ? (
+            <>
+              <button
+                className="text-sm px-3 py-2 w-full text-left focus:ring-2 focus:ring-black font-medium rounded-lg bg-gray-600 hover:bg-gray-500"
+                onClick={() => {
+                  router.push("/auth/login");
+                  setMenuOpen(false);
+                }}
+              >
+                Log in
+              </button>
+              <button
+                className="text-sm px-3 py-2 w-full text-left focus:ring-2 focus:ring-black font-medium rounded-lg bg-gray-600 hover:bg-gray-500"
+                onClick={() => {
+                  router.push("/auth/signup");
+                  setMenuOpen(false);
+                }}
+              >
+                Sign up
+              </button>
+            </>
+          ) : (
+            <button
+              className="text-sm px-3 py-2 w-full text-left focus:ring-2 focus:ring-black font-medium rounded-lg bg-gray-600 hover:bg-gray-500"
+              onClick={() => {
+                handleLogout();
+                setMenuOpen(false);
+              }}
+            >
+              Log out
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,98 +1,146 @@
-  "use client"
-  import Appbar from "@/components/appbar";
-  import { useEffect, useState } from "react";
-  import { useRouter } from "next/navigation";
-  import ChatForm from "@/components/chatform";
-  import ChatMessage from "@/components/chatmessage";
-  import { socket } from "@/lib/SocketClient";
+"use client";
+import Appbar from "@/components/appbar";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import ChatForm from "@/components/chatform";
+import ChatMessage from "@/components/chatmessage";
+import { socket } from "@/lib/SocketClient";
 
-  export default function Dashboard() {
-    const router = useRouter();
+// Helper function to format the timestamp
+const formatTime = (timestamp: string) => {
+  const date = new Date(timestamp);
+  return `${date.toLocaleString("en-US", {
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  })}`;
+};
 
-    useEffect(() => {
-      const token = localStorage.getItem("Token");
-      if (!token) {
-        router.push("/auth/login");
-      }
+export default function Dashboard() {
+  const router = useRouter();
+  const [messages, setMessages] = useState<{ sender: string; message: string; timestamp: string }[]>([]);
+  const [room, setRoom] = useState("");
+  const [userName, setUserName] = useState("");
+  const [joined, setJoined] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-      socket.on("user_joined", (message: any) => {
-        setMessages((prev) => [...prev, { sender: "system", message }]);
-      });
+  useEffect(() => {
+    const token = localStorage.getItem("Token");
+    if (!token) {
+      router.push("/auth/login");
+    }
 
-      socket.on("message", (data: any) => {
-        setMessages((prev) => [...prev, data]);
-      });
+    socket.on("user_joined", (message: string) => {
+      const timestamp = new Date().toISOString();
+      setMessages((prev) => [...prev, { sender: "system", message, timestamp }]);
 
-      return () => {
-        socket.off("user_joined");
-        socket.off("message");
-      };
-    }, []);
+      // Remove the "user joined" message after 10 seconds
+      setTimeout(() => {
+        setMessages((prev) => prev.filter((msg) => msg.message !== message));
+      }, 10000);
+    });
 
-    const [messages, setMessages] = useState<{ sender: string; message: string }[]>([]);
-    const [room, setRoom] = useState("");
-    const [userName, setUserName] = useState("");
-    const [joined, setJoined] = useState(false);
+    socket.on("message", (data: { sender: string; message: string }) => {
+      const timestamp = new Date().toISOString();
+      setMessages((prev) => [...prev, { sender: data.sender, message: data.message, timestamp }]);
+    });
 
-    const handleSendMessage = (message: string) => {
-      const data = { room, message, sender: userName };
-      setMessages((prev) => [...prev, { sender: userName, message }]);
-      socket.emit("message", data);
+    return () => {
+      socket.off("user_joined");
+      socket.off("message");
     };
+  }, [router]);
 
-    const handleJoinRoom = () => {
-      if (room && userName) {
-        socket.emit("joinRoom", { room, username: userName });
-        setJoined(true);
-      }
-    };
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-    return (
-      <div className="min-h-screen bg-blue">
-        <Appbar />
-        <h1 className="flex flex-col text-5xl font-extrabold items-center my-6">Dashboard</h1>
+  const handleSendMessage = (message: string) => {
+    const timestamp = new Date().toISOString();
+    const data = { room, message, sender: userName, timestamp };
+    setMessages((prev) => [...prev, { sender: userName, message, timestamp }]);
+    socket.emit("message", data);
+  };
+
+  const handleJoinRoom = () => {
+    if (room && userName) {
+      socket.emit("joinRoom", { room, username: userName });
+      setJoined(true);
+    } else {
+      alert("Please enter both a username and room name.");
+    }
+  };
+
+  // Function to determine if it's time to display a timestamp based on the previous message
+  const shouldDisplayTime = (currentTimestamp: string, index: number) => {
+    if (index === 0) {
+      return true; // Show timestamp for the first message
+    }
+
+    const previousTimestamp = new Date(messages[index - 1].timestamp);
+    const currentTime = new Date(currentTimestamp);
+
+    const diffInMinutes = Math.floor((currentTime.getTime() - previousTimestamp.getTime()) / 60000);
+    return diffInMinutes >= 15; // Show timestamp if the difference is 15 minutes or more
+  };
+
+  return (
+    <div className="min-h-screen bg-blue">
+      <Appbar />
+      <div className="container mx-auto px-4">
+        <h1 className="text-center text-4xl font-extrabold text-white my-6">Dashboard</h1>
         {!joined ? (
-          <div className="flex w-full max-w-lg mx-auto flex-col items-center bg-white p-6 shadow-lg rounded-lg">
-            <h1 className="mb-4 text-2xl font-bold text-black">Join a Room</h1>
+          <div className="max-w-lg mx-auto p-6 bg-white shadow-lg rounded-lg">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Join a Room</h2>
             <input
               type="text"
               placeholder="Enter your username"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              className="text-black w-full px-4 py-2 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="block w-full px-4 py-2 mb-4 text-gray-800 border rounded-lg focus:ring-blue-400 focus:border-blue-400"
             />
             <input
               type="text"
               placeholder="Enter room name"
               value={room}
               onChange={(e) => setRoom(e.target.value)}
-              className="text-black w-full px-4 py-2 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="block w-full px-4 py-2 mb-4 text-gray-800 border rounded-lg focus:ring-blue-400 focus:border-blue-400"
             />
             <button
               onClick={handleJoinRoom}
-              className="w-full px-4 py-2 text-white rounded-lg bg-blue-500 hover:bg-blue-600 transition"
+              className="block w-full px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
             >
               Join Room
             </button>
           </div>
         ) : (
-          <div className="px-4">
-            <h2 className="flex flex-col text-3xl font-extrabold items-center py-4">Room: {room}</h2>
-            <div className="h-[400px] max-w-3xl mx-auto overflow-y-auto p-4 mb-4 bg-gray-100 border rounded-lg shadow-sm">
+          <div>
+            <h2 className="text-center text-3xl font-bold text-white mb-4">
+              Room: {room}
+            </h2>
+            <div className="max-w-3xl mx-auto h-[400px] p-4 bg-white border rounded-lg shadow overflow-y-auto">
               {messages.map((msg, index) => (
-                <ChatMessage
-                  key={index}
-                  sender={msg.sender}
-                  message={msg.message}
-                  isOwnMessage={msg.sender === userName}
-                />
+                <div key={index}>
+                  {shouldDisplayTime(msg.timestamp, index) && (
+                    <div className="text-center text-xs text-gray-500 my-2">
+                      {formatTime(msg.timestamp)}
+                    </div>
+                  )}
+                  <ChatMessage
+                    sender={msg.sender}
+                    message={msg.message}
+                    isOwnMessage={msg.sender === userName}
+                  />
+                </div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl mx-auto mt-4">
               <ChatForm onSendMessage={handleSendMessage} />
             </div>
           </div>
         )}
       </div>
-    );
-  }
+    </div>
+  );
+}
