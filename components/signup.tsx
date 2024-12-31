@@ -29,7 +29,9 @@ export default function SignUP() {
         alert("Registration successful! You can now log in.");
         router.push("/auth/login");
       }
-    } catch (error: any) {
+    } 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (error: any) {
       console.error("Signup error response:", error.response);
 
       const status = error.response?.status;

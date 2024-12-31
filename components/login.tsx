@@ -28,7 +28,9 @@ export default function LogIn() {
         console.log("Token", response.data.token);
         router.push("/dashboard");
       }
-    } catch (error: any) {
+    } 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (error: any) {
       console.error("Login error response:", error.response);
 
       const status = error.response?.status;
